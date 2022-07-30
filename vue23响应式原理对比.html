@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>vue</title>
+</head>
+
+<body>
+  <!-- 
+    vue3：
+        1、性能提升：打包小、渲染快、 内存少
+        2、源码升级：Proxy，重写虚拟DOM的实现和tree-shaking
+        3、更好的支持TypeScripts
+        4、新特性：
+           composition API
+           新的内置组件：Fragment Teleport Suspense
+           其他改变：新的生命周期钩子 data选项始终被声明为一个函数 移除keycode支持座位v-on的修饰符
+  -->
+  <script>
+    /* 
+      存在问题： 新增属性，删除属性，界面不会更新，直接通过下表修改数组，界面不会自动更新
+    */
+    let person = {
+      name: '张',
+      age: 18
+    }
+    // 模拟vue2响应式原理 数据劫持
+    //#region 
+    /* let p = {};
+    Object.keys(person).forEach(key => {
+      Object.defineProperty(p, key, {
+        configurable: true,
+        get() { // 有人读取时调用
+          console.log('读取属性')
+          return person[key]
+        },
+        set(val) { // 有人设置时调用
+          console.log('设置属性')
+          person[key] = val;
+        }
+      })
+    }) */
+    //#endregion 
+
+    // 模拟vue3中响应式原理 代理
+    /* 
+      实现原理：
+      1、通过Proxy(代理)：拦截对象中任意属性的变化，包括：属性值的读写、添加、删除等
+      2、通过Reflect(反射)：对源对象的属性进行操作
+    */
+    const p = new Proxy(person, {
+      // 有人读取p的某个属性时调用
+      get(target, propName) {
+        console.log(`有人读取p上的${propName}属性`)
+        return target[propName];
+      },
+      // 有人修改p的某个属性、或给p追加某个属性时调用
+      set(target, propName, value) {
+        console.log(`有人修改或增加p上的${propName}属性，${value}`);
+        target[propName] = value
+      },
+      // 有人删除p的某个属性时调用
+      deleteProperty(target, propName) {
+        console.log(`有人删除p上的${propName}属性`);
+        // return delete target[propName] //返回true或false
+        return Reflect.deleteProperty(target,propName)
+      }
+    })
+  </script>
+</body>
+
+</html>
